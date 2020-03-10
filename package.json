@@ -3,14 +3,13 @@
   "version": "2.1.1",
   "description": "hapi-basic-i18n just i18n",
   "main": "index.js",
-  "engines": {
-    "node": ">=0.11.14"
-  },
   "dependencies": {
-    "hoek": "^2.9.0"
+    "@hapi/hoek": "^9.0.3"
   },
   "scripts": {
-    "test": "make test-cov"
+    "test": "make test",
+    "test:cov": "make test-cov",
+    "test:cov-report": "make test-cov-html"
   },
   "keywords": [
     "hapi-basic-i18n",
@@ -22,21 +21,24 @@
     "email": "ugur@kns.com.tr",
     "web": "http://www.ugurbaltaci.com"
   },
-  "contributors": {
-    "name": "Çağdaş Akar",
-    "email": "cagdas@kns.com.tr",
-    "web": "http://www.cagdasakar.com"
-  },
+  "contributors": [
+    {
+      "name": "Çağdaş Akar",
+      "email": "cagdas@kns.com.tr",
+      "web": "http://www.cagdasakar.com"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:ubaltaci/hapi-basic-i18n.git"
   },
   "license": "MIT",
   "devDependencies": {
-    "code": "^1.3.0",
+    "@hapi/code": "^8.0.1",
+    "@hapi/hapi": "^19.1.1",
+    "@hapi/lab": "^22.0.3",
+    "@hapi/vision": "^6.0.0",
     "handlebars": "^2.0.0",
-    "hapi": "^8.1.0",
-    "lab": "^5.2.1",
     "path": "^0.11.14"
   }
 }

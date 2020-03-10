@@ -35,3 +35,6 @@ setup.json
 
 # Do not include in source control
 secrets.js
+
+# VSCODE
+.vscode
