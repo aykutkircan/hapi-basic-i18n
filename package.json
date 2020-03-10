@@ -38,6 +38,7 @@
     "@hapi/hapi": "^19.1.1",
     "@hapi/lab": "^22.0.3",
     "@hapi/vision": "^6.0.0",
+    "@hapi/yar": "^10.0.0",
     "handlebars": "^2.0.0",
     "path": "^0.11.14"
   }

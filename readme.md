@@ -1,9 +1,12 @@
-##hapi-basic-i18n
+# hapi-basic-i18n
 
+## This plugin is migrated version of [https://github.com/ubaltaci/hapi-basic-i18n](hapi-basic-i18n) for Hapi@v19.
+
+## For test reports: [Test Report](coverage.html)
 * Plugin options w/ registration;
 
 	```js
-	server.register([
+	await server.register([
     {
         register: require("hapi-basic-i18n"),
         options: {
@@ -12,7 +15,7 @@
 			default_language: "EN",
 			available_languages: ["EN"]
         }
-    }], cb);
+    }]);
     
    ```
 
@@ -25,8 +28,8 @@
 * In route handler:
 
 	```js
-	function(request, reply) {
-		reply(request.i18n("wtf"));
+	function(request, h) {
+		return request.i18n("wtf");
 	}
 	```
 

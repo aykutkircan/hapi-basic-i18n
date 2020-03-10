@@ -2,19 +2,18 @@
 const Hapi = require('@hapi/hapi');
 const Code = require('@hapi/code');
 const Lab = require('@hapi/lab');
-const Hoek = require('@hapi/hoek');
 const Path = require("path");
 const Vision = require('@hapi/vision');
+const Yar = require('@hapi/yar');
 
-// Declare internals
-const internals = {};
-
+// Test Locales
+const locale_path = Path.join(__dirname, "/languages");
 // Test shortcuts
 const lab = exports.lab = Lab.script();
 
 const { describe, it, beforeEach } = lab;
 
-const { expect } = Code;
+const { expect, fail } = Code;
 
 describe("Hapi Basic i18n", function () {
     let server;
@@ -24,18 +23,17 @@ describe("Hapi Basic i18n", function () {
             server = new Hapi.Server();
             await server.start();
 
-            console.log(server.inject);
         } catch (error) {
             console.error(error);
         }
     });
     
-    it("returns valid localized strings for EN", async function () {
+    it("Must returns valid localized strings for EN", async function () {
         try {
             await server.register({
                 plugin: require("../"),
                 options: {
-                    locale_path: "./test/languages",
+                    locale_path,
                     default_language: "EN",
                     available_languages: ["EN", "TR"]
                 }
@@ -43,7 +41,7 @@ describe("Hapi Basic i18n", function () {
             
             server.route({
                 method: 'GET',
-                path: '/',
+                path: '/{language?}',
                 config: {
                     handler: function (request, h) {
                         expect(request.i18n).to.exist();
@@ -55,35 +53,35 @@ describe("Hapi Basic i18n", function () {
                             xxx: request.i18n("XXX"),
                             not_exist: request.i18n("Hohoho")
                         };
-                        return localized
+                        return {localized}
                     }
                 }
             });
     
-            await server.inject("/", function (res) {
-                expect(res.result).to.exist();
-                expect(res.result.localized).to.exist();
-                
-                const localized = res.result.localized;
-                
-                expect(localized.hello).to.equal("Hello!");
-                expect(localized.say_hello_to).to.equal("Hello Isaac!");
-                expect(localized.number).to.equal("Number 1");
-                expect(localized.xxx).to.equal("EN XX");
-                expect(localized.number_not_exist).to.equal("198");
-                expect(localized.not_exist).to.equal("Hohoho");
-            });
+            const res = await server.inject("/en");
+
+            expect(res.result).to.exist();
+            expect(res.result.localized).to.exist();
+            
+            const localized = res.result.localized;
+            
+            expect(localized.hello).to.equal("Hello!");
+            expect(localized.say_hello_to).to.equal("Hello Isaac!");
+            expect(localized.number).to.equal("Number 1");
+            expect(localized.xxx).to.equal("EN XX");
+            expect(localized.number_not_exist).to.equal("198");
+            expect(localized.not_exist).to.equal("Hohoho");
         } catch (err) {
             expect(err).to.not.exist();
         }
     });
 
-    it("returns valid localized strings from default language when avaiable languages mismatch with default one", async function () {
+    it("Must returns valid localized strings from default language when avaiable languages mismatch with default one", async function () {
         try {
             await server.register({
                 plugin: require("../"),
                 options: {
-                    locale_path: "./test/languages",
+                    locale_path,
                     default_language: "EN",
                     available_languages: ["TR"]
                 }
@@ -91,36 +89,35 @@ describe("Hapi Basic i18n", function () {
 
             server.route({
                 method: 'GET',
-                path: '/',
+                path: '/{language?}',
                 config: {
                     handler: function (request, h) {
                         expect(request.i18n).to.exist();
 
                         const localized = { hello: request.i18n("Hello") };
-                        return localized
+                        return {localized}
                     }
                 }
             });
 
-            await server.inject("/", function (res) {
-                expect(res.result).to.exist();
-                expect(res.result.localized).to.exist();
+            const res = await server.inject("/")
+            expect(res.result).to.exist();
+            expect(res.result.localized).to.exist();
 
-                const localized = res.result.localized;
+            const localized = res.result.localized;
 
-                expect(localized.hello).to.equal("Hello!");
-            });
+            expect(localized.hello).to.equal("Hello!");
         } catch (err) {
             expect(err).to.not.exist();
         }
     });
 
-    it("returns valid localized strings for TR", async function () {
+    it("Must returns valid localized strings for TR", async function () {
         try {
             await server.register({
                 plugin: require("../"),
                 options: {
-                    locale_path: "./test/languages",
+                    locale_path,
                     default_language: "TR",
                     available_languages: ["EN", "TR"]
                 }
@@ -128,7 +125,7 @@ describe("Hapi Basic i18n", function () {
 
             server.route({
                 method: 'GET',
-                path: '/',
+                path: '/{language?}',
                 config: {
                     handler: function (request, h) {
                         expect(request.i18n).to.exist();
@@ -141,29 +138,28 @@ describe("Hapi Basic i18n", function () {
                             not_exist: request.i18n("Hohoho")
                         };
 
-                        return localized
+                        return {localized}
                     }
                 }
             });
 
-            await server.inject("/", function (res) {
-                expect(res.result).to.exist();
-                expect(res.result.localized).to.exist();
-                
-                const localized = res.result.localized;
-                
-                expect(localized.hello).to.equal("Merhaba!");
-                expect(localized.say_hello_to).to.equal("Selam Isaac!");
-                expect(localized.number).to.equal("1 Numara");
-                expect(localized.xxx).to.equal("XXX");
-                expect(localized.not_exist).to.equal("Hohoho");
-            );
+            const res = await server.inject("/tr");
+            expect(res.result).to.exist();
+            expect(res.result.localized).to.exist();
+            
+            const localized = res.result.localized;
+            
+            expect(localized.hello).to.equal("Merhaba!");
+            expect(localized.say_hello_to).to.equal("Selam Isaac!");
+            expect(localized.number).to.equal("1 Numara");
+            expect(localized.xxx).to.equal("XXX");
+            expect(localized.not_exist).to.equal("Hohoho");
         } catch (err) {
             expect(err).to.not.exist();
         }
     });
 
-    it("returns ..", async function () {
+    it("Must return view includes all locales", async function () {
         try {
             await server.register(Vision);
             await server.views({
@@ -177,7 +173,7 @@ describe("Hapi Basic i18n", function () {
             await server.register({
                 plugin: require("../"),
                 options: {
-                    locale_path: "./test/languages",
+                    locale_path,
                     default_language: "EN",
                     available_languages: ["EN", "TR"]
                 }
@@ -189,23 +185,123 @@ describe("Hapi Basic i18n", function () {
                 config: {
                     handler: function (request, h) {
                         expect(request.i18n).to.exist();
-                        var localized = {
-                            hello: request.i18n("Hello")
-                        };
+
                         return h.view("index");
                     }
                 }
             });
 
-            await server.inject("/", function (res) {
-                var tokens = res.result.split("\n");
+            const res = await server.inject("/")
+            const tokens = res.result.split("\n");
 
-                expect(tokens[2]).to.equal("Hello!");
-                expect(tokens[3]).to.equal("Hello Isaac!");
+            expect(tokens[2]).to.equal("Hello!");
+            expect(tokens[3]).to.equal("Hello Isaac!");
 
-            });
         } catch (err) {
-            console.error(err);
+            expect(err).to.not.exist();
+        }
+    });
+
+    it("Must throw error cause invalid path", async function () {
+        try {
+
+            await server.register({
+                plugin: require("../"),
+                options: {
+                    locale_path: "/somethingwrong",
+                    default_language: "EN",
+                    available_languages: ["EN", "TR"]
+                }
+            })
+
+            server.route({
+                method: 'GET',
+                path: '/',
+                config: {
+                    handler: function (request, h) {
+                        const localized = {
+                            hello: request.i18n("Hello"),
+                            say_hello_to: request.i18n("Say Hello To", "Isaac"),
+                            number: request.i18n("1"),
+                            xxx: request.i18n("XXX"),
+                            not_exist: request.i18n("Hohoho")
+                        };
+
+                        return {localized}
+                    }
+                }
+            });
+
+            const res = await server.inject("/")
+            expect(res.result).to.include({ statusCode: 500})
+
+        } catch (err) {
+            fail(err);
+        }
+    });
+
+    it("Must get language from cookie", async function () {
+        try {
+            await server.register({
+                plugin: Yar,
+                options: {
+                    storeBlank: false,
+                    cookieOptions: {
+                        password: 'the-password-must-be-at-least-32-characters-long',
+                        isSecure: true
+                    }
+                }
+            });
+
+            await server.register({
+                plugin: require("../"),
+                options: {
+                    locale_path,
+                    default_language: "EN",
+                    available_languages: ["EN", "TR"]
+                }
+            })
+
+            server.ext("onPreAuth", async function (request, h) {
+                request.yar.set("language", "TR")
+
+                return h.continue;
+            });
+
+
+            server.route({
+                method: 'GET',
+                path: '/{language?}',
+                config: {
+                    handler: function (request, h) {
+
+                        expect(request.yar).to.exist();
+                        const localized = {
+                            hello: request.i18n("Hello"),
+                            say_hello_to: request.i18n("Say Hello To", "Isaac"),
+                            number: request.i18n("1"),
+                            xxx: request.i18n("XXX"),
+                            not_exist: request.i18n("Hohoho")
+                        };
+
+                        return {localized}
+                    }
+                }
+            });
+
+            const res = await server.inject("/")
+            expect(res.result).to.exist();
+            expect(res.result.localized).to.exist();
+            
+            const localized = res.result.localized;
+            
+            expect(localized.hello).to.equal("Merhaba!");
+            expect(localized.say_hello_to).to.equal("Selam Isaac!");
+            expect(localized.number).to.equal("1 Numara");
+            expect(localized.xxx).to.equal("XXX");
+            expect(localized.not_exist).to.equal("Hohoho");
+
+        } catch (err) {
             expect(err).to.not.exist();
         }
     });
